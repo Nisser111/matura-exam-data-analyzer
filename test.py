@@ -1,3 +1,6 @@
+
+import tkinter as tk
+from tkinter import filedialog
 import pandas as pd
 import math
 import numpy as np
@@ -12,7 +15,6 @@ def Average(list):
         else:
             sum = sum+float(i)
     return sum/length
-
 
 class Analiza:
     def __init__(self,excel_file,school='TECHNIKUM NR 2 W ZDUŃSKIEJ WOLI'):
@@ -45,7 +47,7 @@ class Analiza:
             plt.grid(True, linestyle='--', linewidth=0.5, color='gray')
             plt.savefig('subject_data_graph.png',bbox_inches ="tight")
         subject_df.to_excel(subject+'_data.xlsx',sheet_name=subject,header=['Liczba zdających','liczba laureatów/finalistów','zdawalność (%)','średni wynik (%)','odchylenie standardowe (%)','mediana (%)','modalna (%)'],index=False)
-    def get_school_data(self,get_graph=True,*subject): # *zmiana na zdawało*
+    def get_school_data(self,get_graph=True,*subject):
         dataframes=[]
         subject = list(subject)
         for i in subject:
@@ -111,21 +113,61 @@ class Analiza:
         result = pd.DataFrame(data=result,index=['Zdało'])
         result.to_excel('comparison.xlsx', sheet_name=self.school+'_comparison')
 
-        
 
-            
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("School Data Analysis")
+        self.geometry("400x400")
 
-        
+        self.file_path = None
+        self.subject_entry = None
+        self.oke_avg_entry = None
 
+        self.label = tk.Label(self, text="Select Excel File:")
+        self.label.pack(pady=10)
 
+        self.select_button = tk.Button(self, text="Select File", command=self.select_file)
+        self.select_button.pack()
 
-analize = Analiza(r'C:\Users\Max\Desktop\analiza\Analiza matur\wyniki_em_szkoly_2021.xlsx')
+        self.subject_label = tk.Label(self, text="Enter Subject:")
+        self.subject_label.pack()
+        self.subject_entry = tk.Entry(self)
+        self.subject_entry.pack()
 
-analize.get_subject_data('Język angielski - poziom podstawowy')
+        self.oke_avg_label = tk.Label(self, text="Enter OKE Average:")
+        self.oke_avg_label.pack()
+        self.oke_avg_entry = tk.Entry(self)
+        self.oke_avg_entry.pack()
 
-analize.get_school_data(True,'Język angielski - poziom podstawowy','Język angielski - poziom rozszerzony','Język angielski - poziom dwujęzyczny')
+        self.analyze_subject_button = tk.Button(self, text="Analyze Subject Data", command=self.analyze_subject_data)
+        self.analyze_subject_button.pack(pady=10)
+        self.analyze_school_button = tk.Button(self, text="Analyze School Data", command=self.analyze_school_data)
+        self.analyze_school_button.pack()
+    def select_file(self):
+        self.file_path = filedialog.askopenfilename(filetypes=[("Excel Files", "*.xlsx")])
+    def analyze_subject_data(self):
+        subject = self.subject_entry.get()
+        analize = Analiza(self.file_path)
+        if self.file_path and self.subject_entry.get():
+            try:
+                analize.get_subject_data(subject)
+            except Exception as e:
+                print("Error:", e)
+        else:
+            print("Please select an Excel file and enter a subject and OKE average.")
+    def analyze_school_data(self):
+        subject = self.subject_entry.get()
+        analize = Analiza(self.file_path)
+        if self.file_path and self.subject_entry.get():
+            try:
+                analize.get_school_data(True,subject)
+            except Exception as e:
+                print("Error:", e)
+        else:
+            print("Please select an Excel file and enter a subject and OKE average.")
 
-analize.get_school_comparison('Łódzkie','Język angielski - poziom podstawowy',70)
-
-
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
 
